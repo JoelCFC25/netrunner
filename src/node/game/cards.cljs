@@ -253,6 +253,11 @@
    "Corporate Shuffle"
    {:effect (effect (shuffle-into-deck :hand) (draw 5))}
 
+   "Corporate Troubleshooter"
+   {:abilities [{:prompt "How many credits?" :choices :credit 
+                 :msg (msg "add " target " strength to a rezzed ICE protecting this server until the end of the turn")
+                 :effect (effect (lose :corp :credit target) (trash card))}]}
+
    "Corporate War"
    {:effect #(if (> (get-in @% [:corp :credit]) 6)
                (gain % :corp :credit 7)

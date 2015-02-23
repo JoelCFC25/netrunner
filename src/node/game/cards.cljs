@@ -1967,6 +1967,10 @@
                  :trace {:base 3 :msg "give the Runner 1 tag and do 1 brain damage"
                          :effect (effect (damage :brain 1) (gain :runner :tag 1))}}]}
 
+   "Information Overload"
+   {:abilities [{:label "Trace 1 - Give the Runner 1 tag"
+                 :trace {:base 1 :msg "give the Runner 1 tag" :effect (effect (gain :runner :tag 1))}}]}
+
    "IQ"
    {:abilities [{:msg "end the run" :effect (effect (end-run))}]}
 

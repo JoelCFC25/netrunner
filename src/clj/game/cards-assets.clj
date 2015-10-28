@@ -538,23 +538,19 @@
                  :msg "swap the positions of two ICE"}]}
 
    "Team Sponsorship"
-   (let [thelper (fn ts [n] {:prompt "Install a card from Archives or HQ?" :choices ["Archives" "HQ"]
-                             :msg (msg "install a card from " target)
-                             :effect (effect (resolve-ability
-                                               {:prompt "Choose a card to install"
-                                                :not-distinct true
-                                                :choices (req (filter #(not= (:type %) "Operation")
-                                                                      ((if (= target "HQ") :hand :discard) corp)))
-                                                :effect (req (corp-install state side target nil {:no-install-cost true})
-                                                             (when (pos? (dec n))
-                                                               (resolve-ability state side (ts (dec n)) card nil)))}
-                                               card targets))})]
-   {:events {:agenda-scored
-             {:req (req (not (get-in @state [:per-turn (keyword (str "team-sponsorship-" (:cid target)))]))) ; only one TS responds per score
-              :effect (req (let [ts (->> (:corp @state) :servers seq flatten (mapcat :content)
-                                         (filter #(and (:rezzed %) (= (:title %) "Team Sponsorship"))) count)]
-                             (swap! state assoc-in [:per-turn (keyword (str "team-sponsorship-" (:cid target)))] true)
-                             (resolve-ability state side (thelper ts) card nil)))}}})
+   {:events {:agenda-scored {:effect (req (system-msg state :corp
+                                            (str "can install a card at no cost from Archives or HQ by clicking on Team Sponsorship"))
+                                          (update! state side (assoc card :ts-install true)))}}
+    :abilities [{:req (req (:ts-install card))
+                 :label "Install a card from Archives or HQ"
+                 :prompt "Install a card from Archives or HQ?" :choices ["Archives" "HQ"]
+                 :msg (msg "install a card from " target " at no cost")
+                 :effect (effect (resolve-ability
+                                   {:prompt "Choose a card to install" :not-distinct true
+                                    :choices (req (filter #(not= (:type %) "Operation")
+                                                             (get-in @state [:corp (if (= target "HQ") :hand :discard)])))
+                                    :effect (req (corp-install state side target nil {:no-install-cost true}))} card nil)
+                                 (update! (dissoc (get-card state card) :ts-install)))}]}
 
    "Tech Startup"
    {:abilities [{:label "Install an asset from R&D"
